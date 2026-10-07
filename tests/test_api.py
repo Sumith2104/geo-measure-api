@@ -96,3 +96,29 @@ def test_include_geometry_features(client, kml_bytes):
     # Explicit: include_geometry=false -> geometry is null
     f_without = client.get(f"/api/files/{fid}/features/?include_geometry=false").json()
     assert all(item["geometry"] is None for item in f_without["items"])
+
+
+def test_health(client):
+    r = client.get("/health")
+    assert r.status_code == 200 and r.json() == {"status": "ok"}
+
+
+def test_viewer_loads_html(client):
+    r = client.get("/viewer")
+    assert r.status_code == 200
+    assert "Geospatial" in r.text and "leaflet" in r.text.lower()
+
+
+def test_invalid_assume_crs_rejected(client, shp_zip):
+    r = up(client, "f.zip", shp_zip, params={"assume_crs": "NOT_A_CRS"})
+    assert r.status_code == 422
+    assert r.json()["detail"]["code"] == "INVALID_CRS"
+
+
+def test_empty_kml_no_features(client):
+    empty_kml = b'<?xml version="1.0"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document></Document></kml>'
+    r = up(client, "empty.kml", empty_kml)
+    assert r.status_code == 422
+    detail = r.json()["detail"]
+    assert detail["code"] == "NO_FEATURES"
+    assert detail["file_id"]  # file is recorded for traceability
