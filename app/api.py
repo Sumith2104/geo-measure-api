@@ -54,6 +54,16 @@ def upload(
         kind = service.detect_kind(name)
     except GeoFileError as e:
         raise HTTPException(422, {"code": e.code, "message": e.message})
+    if assume_crs is not None:
+        try:
+            from pyproj import CRS
+
+            CRS.from_user_input(assume_crs)
+        except Exception:
+            raise HTTPException(
+                422,
+                {"code": "INVALID_CRS", "message": f"'{assume_crs}' is not a recognised CRS identifier"},
+            )
     record = GeoFile(filename=name, file_type=kind, status=FileStatus.PROCESSING)
     db.add(record)
     db.commit()
