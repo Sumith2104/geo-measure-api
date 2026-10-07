@@ -18,6 +18,7 @@ KINDS = {".kml": "KML", ".zip": "SHAPEFILE"}
 
 
 def detect_kind(filename: str) -> str:
+    """Map a filename extension to a file-type key, or raise on unsupported types."""
     kind = KINDS.get(Path(filename).suffix.lower())
     if not kind:
         raise GeoFileError(
@@ -51,6 +52,11 @@ def _to_row(file_id: str, raw, crs) -> Feature:
 
 
 def process_file(db: Session, record: GeoFile, path: Path, assume_crs: str | None) -> GeoFile:
+    """Parse *path*, measure every feature, and persist results.
+
+    On success the record transitions to COMPLETED; on any
+    ``GeoFileError`` it transitions to FAILED with the error code.
+    """
     try:
         parsed: ParsedFile = (
             read_kml(path)

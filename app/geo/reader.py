@@ -99,6 +99,11 @@ def read_shapefile_zip(
     max_entries: int,
     assume_crs: str | None = None,
 ) -> ParsedFile:
+    """Extract and parse a zipped Shapefile into normalised features.
+
+    Handles nested directories, missing .prj (with optional override),
+    and multi-layer zips where CRS differs between layers.
+    """
     with tempfile.TemporaryDirectory() as tmp:
         shps = safe_extract_shapefile_zip(path, Path(tmp), max_uncompressed, max_entries)
         parsed: ParsedFile | None = None
@@ -121,11 +126,13 @@ def read_shapefile_zip(
                 gdf = gdf.to_crs(parsed.crs)
                 parsed.warnings.append(f"{shp.name} reprojected to {parsed.crs.to_string()} to match first layer")
             parsed.features += _rows(gdf, len(parsed.features), shp.stem)
-        assert parsed is not None
+        if parsed is None:  # pragma: no cover — guarded by shps check above
+            raise GeoFileError("NO_FEATURES", "Zip produced no parseable layers")
         return parsed
 
 
 def read_kml(path: Path) -> ParsedFile:
+    """Parse a KML file, iterating all Folder layers (not just the default first)."""
     try:
         layers = [str(n) for n, _ in pyogrio.list_layers(path)]  # each KML <Folder> becomes a layer
     except Exception as exc:

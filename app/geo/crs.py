@@ -12,6 +12,8 @@ NORTH_POLAR_EPSG = 3413  # NSIDC Polar Stereographic North
 SOUTH_POLAR_EPSG = 3031  # Antarctic Polar Stereographic
 POLAR_LAT = 80.0
 
+LonLat = tuple[float, float]
+
 
 def is_metric_projected(crs: CRS) -> bool:
     return bool(
@@ -20,6 +22,7 @@ def is_metric_projected(crs: CRS) -> bool:
 
 
 def utm_epsg(lon: float, lat: float) -> int:
+    """Return the EPSG code for the UTM zone containing the given lon/lat."""
     lon = ((lon + 180.0) % 360.0) - 180.0
     zone = min(int((lon + 180.0) // 6) + 1, 60)
     return (32600 if lat >= 0 else 32700) + zone
@@ -30,7 +33,8 @@ def get_transformer(src_wkt: str, dst_epsg: int) -> Transformer:
     return Transformer.from_crs(CRS.from_wkt(src_wkt), CRS.from_epsg(dst_epsg), always_xy=True)
 
 
-def representative_lonlat(geom: BaseGeometry, src: CRS) -> tuple[float, float]:
+def representative_lonlat(geom: BaseGeometry, src: CRS) -> LonLat:
+    """Get a lon/lat point guaranteed to be inside *geom* (not the centroid)."""
     p = geom.representative_point()  # always inside the geometry, unlike centroid
     if src.is_geographic:
         return p.x, p.y

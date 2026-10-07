@@ -67,6 +67,12 @@ def _geodesic(geom: BaseGeometry, src: CRS) -> tuple[float | None, float | None]
 
 
 def measure(geom: BaseGeometry | None, src: CRS) -> Measurement:
+    """Compute area/length for a single geometry in metric units.
+
+    Returns a Measurement with status indicating success or reason for
+    skipping.  Never raises — errors are captured as MeasureStatus.ERROR
+    so one bad feature cannot fail an entire file.
+    """
     if geom is None or geom.is_empty:
         return Measurement(MeasureStatus.UNSUPPORTED, warning="null or empty geometry")
     gt = geom.geom_type
