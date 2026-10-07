@@ -5,9 +5,11 @@
 [![Tests](https://img.shields.io/badge/tests-30%20passed-brightgreen.svg?logo=pytest&logoColor=white)](https://docs.pytest.org/)
 [![Code Style](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717.svg?logo=github&logoColor=white)](https://github.com/Sumith2104/geo-measure-api)
 
-A high-performance, production-grade backend service built with **FastAPI**, **GeoPandas**, **Shapely**, and **Pyproj**. It accepts geospatial files (zipped Shapefiles or KML), extracts geometric features, and computes high-precision metric measurements (polygon area/perimeter, linestring length) using **dynamically projected Coordinate Reference Systems (CRS)** rather than degree-based ellipsoidal distortions.
+A high-performance, production-grade backend service built with **FastAPI**, **GeoPandas**, **Shapely**, and **Pyproj**. It accepts geospatial files (zipped Shapefiles or KML), extracts geometric features, and computes high-precision metric measurements (polygon area/perimeter, linestring length) using **dynamically projected Coordinate Reference Systems (CRS)** rather than degree-based ellipsoidal distortions. Includes an interactive web map explorer at `/viewer`.
+
+> **Repository URL:** [https://github.com/Sumith2104/geo-measure-api](https://github.com/Sumith2104/geo-measure-api)
 
 ---
 
@@ -517,7 +519,7 @@ flowchart TD
 - **PostGIS & Spatial Indexing:** Migrate geometry columns to native PostGIS types with GiST indexing for spatial bounding box and intersection queries.
 - **Expanded File Support:** Support for KMZ (zipped KML), GeoPackage (`.gpkg`), GeoJSON, and FlatGeobuf.
 - **Equal-Area Regional Projections:** Add an optional Albers Equal Area or Lambert Azimuthal Equal Area projection mode for surveys spanning multiple UTM zones.
-- **Interactive Map Visualizer:** A lightweight React + Leaflet/MapLibre web interface to visually render uploaded drone boundaries and flight lines.
+- **Interactive Map Visualizer:** Live interactive visualizer implemented at `/viewer` using Leaflet. Future scope: extend to 3D terrain mesh rendering using CesiumJS or MapLibre GL for drone elevation models.
 
 ---
 
