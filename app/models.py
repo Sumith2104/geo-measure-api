@@ -2,7 +2,18 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON, DateTime, Enum, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -37,7 +48,10 @@ class GeoFile(Base):
 
 class Feature(Base):
     __tablename__ = "features"
-    __table_args__ = (UniqueConstraint("file_id", "idx"), Index("ix_features_file_type", "file_id", "geometry_type"))
+    __table_args__ = (
+        UniqueConstraint("file_id", "idx"),
+        Index("ix_features_file_type", "file_id", "geometry_type"),
+    )
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     file_id: Mapped[str] = mapped_column(ForeignKey("geo_files.id", ondelete="CASCADE"), index=True)
     idx: Mapped[int] = mapped_column(Integer)

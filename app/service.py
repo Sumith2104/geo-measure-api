@@ -20,7 +20,10 @@ KINDS = {".kml": "KML", ".zip": "SHAPEFILE"}
 def detect_kind(filename: str) -> str:
     kind = KINDS.get(Path(filename).suffix.lower())
     if not kind:
-        raise GeoFileError("UNSUPPORTED_FILE_TYPE", "Only .kml or a .zip containing a Shapefile are accepted")
+        raise GeoFileError(
+            "UNSUPPORTED_FILE_TYPE",
+            "Only .kml or a .zip containing a Shapefile are accepted",
+        )
     return kind
 
 
@@ -29,21 +32,35 @@ def _to_row(file_id: str, raw, crs) -> Feature:
     m = measure(g, crs)
     gj = mapping(shapely.force_2d(g)) if g is not None and not g.is_empty else None
     return Feature(
-        file_id=file_id, idx=raw.index, layer=raw.layer,
+        file_id=file_id,
+        idx=raw.index,
+        layer=raw.layer,
         geometry_type=g.geom_type if g is not None else "None",
-        geometry=gj, crs=crs.to_string(), properties=raw.properties,
-        measure_status=m.status.value, area_m2=m.area_m2, length_m=m.length_m, perimeter_m=m.perimeter_m,
-        projected_crs=m.projected_crs, geodesic_area_m2=m.geodesic_area_m2,
-        geodesic_length_m=m.geodesic_length_m, warning=m.warning,
+        geometry=gj,
+        crs=crs.to_string(),
+        properties=raw.properties,
+        measure_status=m.status.value,
+        area_m2=m.area_m2,
+        length_m=m.length_m,
+        perimeter_m=m.perimeter_m,
+        projected_crs=m.projected_crs,
+        geodesic_area_m2=m.geodesic_area_m2,
+        geodesic_length_m=m.geodesic_length_m,
+        warning=m.warning,
     )
 
 
 def process_file(db: Session, record: GeoFile, path: Path, assume_crs: str | None) -> GeoFile:
     try:
         parsed: ParsedFile = (
-            read_kml(path) if record.file_type == "KML"
-            else read_shapefile_zip(path, max_uncompressed=settings.max_zip_uncompressed_bytes,
-                                    max_entries=settings.max_zip_entries, assume_crs=assume_crs)
+            read_kml(path)
+            if record.file_type == "KML"
+            else read_shapefile_zip(
+                path,
+                max_uncompressed=settings.max_zip_uncompressed_bytes,
+                max_entries=settings.max_zip_entries,
+                assume_crs=assume_crs,
+            )
         )
         if not parsed.features:
             raise GeoFileError("NO_FEATURES", "File contains no features")
@@ -54,7 +71,11 @@ def process_file(db: Session, record: GeoFile, path: Path, assume_crs: str | Non
         record.status = FileStatus.COMPLETED
     except GeoFileError as e:
         db.rollback()
-        record.status, record.error_code, record.error_message = FileStatus.FAILED, e.code, e.message
+        record.status, record.error_code, record.error_message = (
+            FileStatus.FAILED,
+            e.code,
+            e.message,
+        )
     record.processed_at = datetime.now(timezone.utc)
     db.add(record)
     db.commit()

@@ -74,7 +74,10 @@ def safe_extract_shapefile_zip(zip_path: Path, dest: Path, max_uncompressed: int
             name = Path(info.filename)
             if info.is_dir() or name.suffix.lower() not in wanted or name.name.startswith(("._", "__MACOSX")):
                 continue
-            with zf.open(info) as src, open(dest / name.name, "wb") as dst:  # name.name drops any ../ path
+            with (
+                zf.open(info) as src,
+                open(dest / name.name, "wb") as dst,
+            ):  # name.name drops any ../ path
                 dst.write(src.read())
     shps = sorted(dest.glob("*.shp"))
     if not shps:
@@ -82,12 +85,20 @@ def safe_extract_shapefile_zip(zip_path: Path, dest: Path, max_uncompressed: int
     for shp in shps:
         missing = [e for e in SHP_REQUIRED if not shp.with_suffix(e).exists()]
         if missing:
-            raise GeoFileError("INCOMPLETE_SHAPEFILE", f"{shp.name} is missing {', '.join(sorted(missing))}")
+            raise GeoFileError(
+                "INCOMPLETE_SHAPEFILE",
+                f"{shp.name} is missing {', '.join(sorted(missing))}",
+            )
     return shps
 
 
-def read_shapefile_zip(path: Path, *, max_uncompressed: int, max_entries: int,
-                       assume_crs: str | None = None) -> ParsedFile:
+def read_shapefile_zip(
+    path: Path,
+    *,
+    max_uncompressed: int,
+    max_entries: int,
+    assume_crs: str | None = None,
+) -> ParsedFile:
     with tempfile.TemporaryDirectory() as tmp:
         shps = safe_extract_shapefile_zip(path, Path(tmp), max_uncompressed, max_entries)
         parsed: ParsedFile | None = None
@@ -99,7 +110,10 @@ def read_shapefile_zip(path: Path, *, max_uncompressed: int, max_entries: int,
             crs = gdf.crs
             if crs is None:
                 if not assume_crs:
-                    raise GeoFileError("MISSING_CRS", f"{shp.name} has no .prj/CRS. Re-upload with a .prj or pass ?assume_crs=EPSG:xxxx")
+                    raise GeoFileError(
+                        "MISSING_CRS",
+                        f"{shp.name} has no .prj/CRS. Re-upload with a .prj or pass ?assume_crs=EPSG:xxxx",
+                    )
                 crs = CRS.from_user_input(assume_crs)
             if parsed is None:
                 parsed = ParsedFile(crs=CRS.from_user_input(crs))

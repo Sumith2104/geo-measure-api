@@ -1,4 +1,5 @@
 """CRS selection: never measure in degrees."""
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -14,9 +15,7 @@ POLAR_LAT = 80.0
 
 def is_metric_projected(crs: CRS) -> bool:
     return bool(
-        crs.is_projected
-        and crs.axis_info
-        and all(abs(a.unit_conversion_factor - 1.0) < 1e-9 for a in crs.axis_info)
+        crs.is_projected and crs.axis_info and all(abs(a.unit_conversion_factor - 1.0) < 1e-9 for a in crs.axis_info)
     )
 
 

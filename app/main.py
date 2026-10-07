@@ -1,7 +1,6 @@
 import logging
 
 from fastapi import FastAPI, Request
-from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
 from app.api import router
@@ -24,7 +23,10 @@ def create_app() -> FastAPI:
     @app.exception_handler(Exception)
     async def unhandled(_: Request, exc: Exception):
         log.exception("unhandled error")
-        return JSONResponse(status_code=500, content={"detail": {"code": "INTERNAL_ERROR", "message": "Unexpected error"}})
+        return JSONResponse(
+            status_code=500,
+            content={"detail": {"code": "INTERNAL_ERROR", "message": "Unexpected error"}},
+        )
 
     return app
 

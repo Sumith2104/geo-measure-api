@@ -1,5 +1,6 @@
 import zipfile
 from pathlib import Path
+
 import geopandas as gpd
 from shapely.geometry import box
 
@@ -10,7 +11,7 @@ out.mkdir(exist_ok=True)
 gdf = gpd.GeoDataFrame(
     {"name": ["Field A", "Field B"], "crop": ["wheat", "rice"]},
     geometry=[box(77.500, 12.900, 77.510, 12.910), box(77.520, 12.900, 77.535, 12.912)],
-    crs="EPSG:4326"
+    crs="EPSG:4326",
 )
 tmp = out / "_shp"
 tmp.mkdir(exist_ok=True)

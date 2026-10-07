@@ -1,9 +1,11 @@
+import pathlib
 import tempfile
 import zipfile
-import pathlib
+
 import geopandas as gpd
-from shapely.geometry import box
 from fastapi.testclient import TestClient
+from shapely.geometry import box
+
 from app.main import app
 
 client = TestClient(app)
@@ -22,7 +24,9 @@ assert r_kml.status_code == 201, f"KML upload failed: {r_kml.status_code}"
 kml_id = r_kml.json()["id"]
 m_kml = client.get(f"/api/files/{kml_id}/measurements/").json()
 poly = [i for i in m_kml["items"] if i["geometry_type"] == "Polygon"][0]
-print(f"[OK] Check 2: KML polygon area = {poly['area_m2']:.2f} m2 ({poly['area_ha']:.2f} ha), projected_crs = {poly['projected_crs']}")
+print(
+    f"[OK] Check 2: KML polygon area = {poly['area_m2']:.2f} m2 ({poly['area_ha']:.2f} ha), projected_crs = {poly['projected_crs']}"
+)
 assert 1_180_000 < poly["area_m2"] < 1_220_000
 assert poly["projected_crs"] == "EPSG:32643"
 print("     -> Polygon area ~1.2 km2 (120 ha) and EPSG:32643 verified -> PASS")

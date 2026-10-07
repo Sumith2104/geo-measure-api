@@ -1,8 +1,15 @@
-import pytest
-from pyproj import CRS, Transformer
-from shapely.geometry import LineString, MultiPolygon, Point, Polygon, GeometryCollection, box
-import shapely
 import numpy as np
+import pytest
+import shapely
+from pyproj import CRS, Transformer
+from shapely.geometry import (
+    GeometryCollection,
+    LineString,
+    MultiPolygon,
+    Point,
+    Polygon,
+    box,
+)
 
 from app.geo.crs import pick_projected_crs, utm_epsg
 from app.geo.measure import MeasureStatus, measure
@@ -15,7 +22,10 @@ def to_wgs(geom, epsg):
     return shapely.transform(geom, lambda c: np.column_stack(t.transform(c[:, 0], c[:, 1])))
 
 
-@pytest.mark.parametrize("epsg,x,y", [(32643, 500000, 1430000), (32632, 700000, 5000000), (32755, 300000, 6000000)])
+@pytest.mark.parametrize(
+    "epsg,x,y",
+    [(32643, 500000, 1430000), (32632, 700000, 5000000), (32755, 300000, 6000000)],
+)
 def test_1km_square_area_close_to_1e6(epsg, x, y):
     g = to_wgs(box(x, y, x + 1000, y + 1000), epsg)
     m = measure(g, WGS)

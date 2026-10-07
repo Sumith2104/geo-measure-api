@@ -10,17 +10,21 @@ import sys
 import tempfile
 import zipfile
 from pathlib import Path
-import httpx
+
 import geopandas as gpd
+import httpx
 from shapely.geometry import box
+
 
 def banner(title: str):
     print("\n" + "=" * 70)
     print(f"  {title}")
     print("=" * 70)
 
+
 def step(num: str, desc: str):
     print(f"\n[STEP {num}] {desc}")
+
 
 def get_test_client():
     # 1. Try connecting to live server
@@ -37,8 +41,11 @@ def get_test_client():
     print("[INFO] Live server not running on port 8000. Running test in-process via FastAPI TestClient...")
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from fastapi.testclient import TestClient
+
     from app.main import app
+
     return TestClient(app)
+
 
 def run():
     client = get_test_client()
@@ -54,7 +61,10 @@ def run():
     step("1.1", "Upload KML file (POST /api/files/)")
     kml_path = Path("samples/sample.kml")
     with open(kml_path, "rb") as f:
-        r = client.post("/api/files/", files={"file": ("sample.kml", f, "application/vnd.google-earth.kml+xml")})
+        r = client.post(
+            "/api/files/",
+            files={"file": ("sample.kml", f, "application/vnd.google-earth.kml+xml")},
+        )
     assert r.status_code == 201, f"Expected 201, got {r.status_code}: {r.text}"
     kml_file = r.json()
     kml_id = kml_file["id"]
@@ -97,7 +107,9 @@ def run():
         gt = item["geometry_type"]
         st = item["status"]
         if gt == "Polygon":
-            print(f"  [POLYGON] Area = {item['area_m2']:,.2f} m2 ({item['area_ha']:.2f} ha), Perimeter = {item['perimeter_m']:.2f} m, Projected CRS = {item['projected_crs']}")
+            print(
+                f"  [POLYGON] Area = {item['area_m2']:,.2f} m2 ({item['area_ha']:.2f} ha), Perimeter = {item['perimeter_m']:.2f} m, Projected CRS = {item['projected_crs']}"
+            )
             assert st == "MEASURED"
             assert item["area_m2"] > 1_000_000  # Proves metric projection, not degrees!
             assert item["projected_crs"] == "EPSG:32643"
@@ -119,7 +131,10 @@ def run():
     step("2.1", "Upload Shapefile zip (POST /api/files/)")
     shp_path = Path("samples/sample_shapefile.zip")
     with open(shp_path, "rb") as f:
-        r = client.post("/api/files/", files={"file": ("sample_shapefile.zip", f, "application/zip")})
+        r = client.post(
+            "/api/files/",
+            files={"file": ("sample_shapefile.zip", f, "application/zip")},
+        )
     assert r.status_code == 201
     shp_file = r.json()
     shp_id = shp_file["id"]
@@ -127,7 +142,7 @@ def run():
     assert shp_file["file_type"] == "SHAPEFILE"
     assert shp_file["feature_count"] == 2
 
-    step("2.2", f"Retrieve Shapefile Measurements with Pagination & Filter")
+    step("2.2", "Retrieve Shapefile Measurements with Pagination & Filter")
     r = client.get(f"/api/files/{shp_id}/measurements/?geometry_type=Polygon&limit=1&offset=0")
     assert r.status_code == 200
     page = r.json()
@@ -148,7 +163,11 @@ def run():
     step("3.2", "Reject Shapefile zip missing .prj (Coordinate Reference System)")
     with tempfile.TemporaryDirectory() as td:
         p = Path(td)
-        gdf = gpd.GeoDataFrame({"name": ["parcel"]}, geometry=[box(77.5, 12.9, 77.51, 12.91)], crs="EPSG:4326")
+        gdf = gpd.GeoDataFrame(
+            {"name": ["parcel"]},
+            geometry=[box(77.5, 12.9, 77.51, 12.91)],
+            crs="EPSG:4326",
+        )
         gdf.to_file(p / "missing_prj.shp")
         (p / "missing_prj.prj").unlink()
         zip_p = p / "missing_prj.zip"
@@ -164,7 +183,10 @@ def run():
 
         step("3.3", "Recover missing .prj with ?assume_crs=EPSG:4326 query parameter")
         with open(zip_p, "rb") as f:
-            r = client.post("/api/files/?assume_crs=EPSG:4326", files={"file": ("missing_prj.zip", f)})
+            r = client.post(
+                "/api/files/?assume_crs=EPSG:4326",
+                files={"file": ("missing_prj.zip", f)},
+            )
         assert r.status_code == 201
         print(f"Status: {r.status_code} Created -> Override successful, Status: {r.json()['status']}")
         assert r.json()["status"] == "COMPLETED"
@@ -197,6 +219,7 @@ def run():
     print(f"Verifying deleted file: GET /api/files/{kml_id}/ -> HTTP {r_after.status_code} Not Found")
 
     banner("WORKFLOW VERIFICATION COMPLETE: ALL REQUIREMENTS 100% PASSING!")
+
 
 if __name__ == "__main__":
     run()

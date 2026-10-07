@@ -14,7 +14,7 @@ from app.geo.crs import get_transformer, pick_projected_crs
 class MeasureStatus(str, Enum):
     MEASURED = "MEASURED"
     NOT_APPLICABLE = "NOT_APPLICABLE"  # points
-    UNSUPPORTED = "UNSUPPORTED"        # collections, empty/null geometry
+    UNSUPPORTED = "UNSUPPORTED"  # collections, empty/null geometry
     ERROR = "ERROR"
 
 
@@ -22,8 +22,8 @@ class MeasureStatus(str, Enum):
 class Measurement:
     status: MeasureStatus
     area_m2: float | None = None
-    length_m: float | None = None          # lines only
-    perimeter_m: float | None = None       # polygons only
+    length_m: float | None = None  # lines only
+    perimeter_m: float | None = None  # polygons only
     projected_crs: str | None = None
     geodesic_area_m2: float | None = None  # independent cross-check (geographic sources only)
     geodesic_length_m: float | None = None
@@ -81,10 +81,21 @@ def measure(geom: BaseGeometry | None, src: CRS) -> Measurement:
         projected = geom if dst == src else _project(geom, src, dst.to_epsg())
         g_area, g_len = _geodesic(geom, src)
         if gt in POLY:
-            return Measurement(MeasureStatus.MEASURED, area_m2=projected.area, perimeter_m=projected.length,
-                               projected_crs=dst.to_string(), geodesic_area_m2=g_area,
-                               geodesic_length_m=g_len, warning=warning)
-        return Measurement(MeasureStatus.MEASURED, length_m=projected.length, projected_crs=dst.to_string(),
-                           geodesic_length_m=g_len, warning=warning)
+            return Measurement(
+                MeasureStatus.MEASURED,
+                area_m2=projected.area,
+                perimeter_m=projected.length,
+                projected_crs=dst.to_string(),
+                geodesic_area_m2=g_area,
+                geodesic_length_m=g_len,
+                warning=warning,
+            )
+        return Measurement(
+            MeasureStatus.MEASURED,
+            length_m=projected.length,
+            projected_crs=dst.to_string(),
+            geodesic_length_m=g_len,
+            warning=warning,
+        )
     except Exception as exc:  # one bad feature must never fail the file
         return Measurement(MeasureStatus.ERROR, warning=f"measurement failed: {exc}")
