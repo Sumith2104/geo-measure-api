@@ -20,6 +20,12 @@ def create_app() -> FastAPI:
     def health():
         return {"status": "ok"}
 
+    @app.get("/", include_in_schema=False)
+    def root():
+        from fastapi.responses import RedirectResponse
+
+        return RedirectResponse(url="/docs")
+
     @app.exception_handler(Exception)
     async def unhandled(_: Request, exc: Exception):
         log.exception("unhandled error")
