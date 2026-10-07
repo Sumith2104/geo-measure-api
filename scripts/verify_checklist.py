@@ -1,6 +1,10 @@
 import pathlib
+import sys
 import tempfile
 import zipfile
+
+# Ensure repository root is on sys.path when invoked directly
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 import geopandas as gpd
 from fastapi.testclient import TestClient
