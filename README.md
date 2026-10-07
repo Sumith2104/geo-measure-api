@@ -252,6 +252,139 @@ curl -F "file=@missing_prj.zip" "http://localhost:8000/api/files/?assume_crs=EPS
 
 ---
 
+### 3. Optional Query Outputs & Advanced Responses
+
+The API supports several optional flags to control payload size and geometry inclusions for different client use-cases (e.g., mobile apps vs GIS frontends).
+
+#### A. Include Geometry in Measurements (`?include_geometry=true`)
+By default, the measurements endpoint omits heavy geometry coordinates to keep payloads fast and lightweight. Clients can optionally request embedded GeoJSON geometries within the measurement objects:
+
+```bash
+curl "http://localhost:8000/api/files/e6b3f79542734e798e4e775db8a4169f/measurements/?include_geometry=true&limit=1"
+```
+
+**Optional Output JSON:**
+```json
+{
+  "file_id": "e6b3f79542734e798e4e775db8a4169f",
+  "crs": "EPSG:4326",
+  "total": 3,
+  "limit": 1,
+  "offset": 0,
+  "summary": {
+    "total_area_m2": 1201853.26,
+    "total_area_ha": 120.19,
+    "total_length_m": 1085.84,
+    "by_geometry_type": { "LineString": 1, "Point": 1, "Polygon": 1 },
+    "by_status": { "MEASURED": 2, "NOT_APPLICABLE": 1 }
+  },
+  "items": [
+    {
+      "index": 0,
+      "geometry_type": "Polygon",
+      "status": "MEASURED",
+      "area_m2": 1201853.26,
+      "area_ha": 120.19,
+      "perimeter_m": 4385.36,
+      "projected_crs": "EPSG:32643",
+      "geodesic_area_m2": 1200618.25,
+      "geodesic_length_m": 4383.11,
+      "warning": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.5, 12.9],
+            [77.51, 12.9],
+            [77.51, 12.91],
+            [77.5, 12.91],
+            [77.5, 12.9]
+          ]
+        ]
+      }
+    }
+  ]
+}
+```
+
+#### B. Lightweight Features List without Coordinates (`?include_geometry=false`)
+When a client only needs feature metadata, attribute table views, or IDs without massive coordinate arrays:
+
+```bash
+curl "http://localhost:8000/api/files/e6b3f79542734e798e4e775db8a4169f/features/?include_geometry=false"
+```
+
+**Optional Output JSON:**
+```json
+{
+  "file_id": "e6b3f79542734e798e4e775db8a4169f",
+  "total": 3,
+  "limit": 100,
+  "offset": 0,
+  "items": [
+    {
+      "index": 0,
+      "layer": "source",
+      "geometry_type": "Polygon",
+      "crs": "EPSG:4326",
+      "properties": { "Name": "field", "crop": "wheat" },
+      "geometry": null
+    },
+    {
+      "index": 1,
+      "layer": "source",
+      "geometry_type": "LineString",
+      "crs": "EPSG:4326",
+      "properties": { "Name": "road" },
+      "geometry": null
+    }
+  ]
+}
+```
+
+#### C. Filter by Geometry Type (`?geometry_type=Polygon|LineString|Point`)
+Isolates specific geometry layers for dedicated processing (e.g. only calculating agricultural boundaries):
+
+```bash
+curl "http://localhost:8000/api/files/e6b3f79542734e798e4e775db8a4169f/measurements/?geometry_type=Polygon"
+```
+
+#### D. Pagination with Offset and Limit (`?limit=10&offset=20`)
+Handles large multi-thousand-polygon survey files gracefully without browser or memory lockup:
+
+```bash
+curl "http://localhost:8000/api/files/e6b3f79542734e798e4e775db8a4169f/measurements/?limit=10&offset=0"
+```
+
+#### E. List All Uploaded Files Catalog (`GET /api/files/`)
+```bash
+curl "http://localhost:8000/api/files/?limit=10"
+```
+
+**Output JSON:**
+```json
+[
+  {
+    "id": "e6b3f79542734e798e4e775db8a4169f",
+    "filename": "sample.kml",
+    "file_type": "KML",
+    "status": "COMPLETED",
+    "crs": "EPSG:4326",
+    "feature_count": 3,
+    "warnings": [],
+    "error_code": null,
+    "error_message": null,
+    "created_at": "2026-10-07T19:07:27.245300Z",
+    "processed_at": "2026-10-07T19:07:27.323234Z"
+  }
+]
+```
+
+#### F. Interactive Web GIS Map Viewer (`GET /viewer`)
+Navigate to [http://localhost:8000/viewer](http://localhost:8000/viewer) in any web browser to view the interactive Leaflet map explorer, featuring drag-and-drop file processing, real-time metric cards, and GeoJSON overlay rendering.
+
+---
+
 ## 🏛 Architecture & System Flow
 
 ### Layered Separation of Concerns
