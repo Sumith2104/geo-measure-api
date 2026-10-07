@@ -16,16 +16,17 @@ A high-performance, production-grade backend service built with **FastAPI**, **G
 ## Table of Contents
 1. [Core Geospatial Problem: Why Degrees $\neq$ Metres](#-core-geospatial-problem-why-degrees--metres)
 2. [Requirement Mapping Matrix](#-requirement-mapping-matrix)
-3. [Quick Start](#-quick-start)
-4. [Testing Suite](#-testing-suite)
+3. [Interactive Web Map Explorer (`/viewer`)](#️-interactive-web-map-explorer-viewer)
+4. [Quick Start](#-quick-start)
+5. [Testing Suite](#-testing-suite)
    - [Automated Testing Methods](#1-automated-testing-methods)
    - [Manual Workflow Testing Methods](#2-manual-workflow-testing-methods)
-5. [Architecture & System Flow](#-architecture--system-flow)
-6. [CRS Handling Strategy](#-crs-handling-strategy)
-7. [Security & Production Hardening](#-security--production-hardening)
-8. [Design Decisions & Alternatives](#-design-decisions--alternatives)
-9. [Learnings & Discoveries](#-learnings--discoveries)
-10. [Future Scope](#-future-scope)
+6. [Architecture & System Flow](#-architecture--system-flow)
+7. [CRS Handling Strategy](#-crs-handling-strategy)
+8. [Security & Production Hardening](#-security--production-hardening)
+9. [Design Decisions & Alternatives](#-design-decisions--alternatives)
+10. [Learnings & Discoveries](#-learnings--discoveries)
+11. [Future Scope](#-future-scope)
 
 ---
 
@@ -55,6 +56,20 @@ This project implements 100% of the specifications from the Aereo assignment doc
 | **Endpoints: Upload, Info, Measurements, Features** | [`app/api.py`](app/api.py) | `test_api.py` (7 tests) |
 | **Documentation: Setup, Architecture, Decisions, Learnings** | [`README.md`](README.md) | Fully documented below |
 | **Public GitHub Repo, Green CI** | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | GitHub Actions workflow |
+
+---
+
+## 🗺️ Interactive Web Map Explorer (`/viewer`)
+
+The service includes an interactive Leaflet.js map explorer to visually inspect uploaded drone survey files, view extracted geometries, and review metric calculations:
+
+| Measurement & Feature Inspector | Drag-and-Drop File Upload |
+|:---:|:---:|
+| ![Geospatial Measurements Viewer](docs/images/viewer_measurements.png) | ![Viewer Landing Page](docs/images/viewer_landing.png) |
+
+- **Live URL:** `http://localhost:8000/viewer`
+- **Supported Formats:** `.kml` or `.zip` (Shapefile)
+- **Features:** Automatic zoom-to-bounds, geometry layer rendering (Polygons, LineStrings, Points), per-feature property viewer, and metric summary cards.
 
 ---
 

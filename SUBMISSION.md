@@ -21,6 +21,16 @@ Key engineering highlights:
 
 ---
 
+## 🗺️ Visual Web Explorer Preview
+
+| Interactive Map & Measurements View | Upload Landing Page |
+|:---:|:---:|
+| ![Geospatial Measurements Viewer](docs/images/viewer_measurements.png) | ![Viewer Landing Page](docs/images/viewer_landing.png) |
+
+*The web viewer runs at `http://localhost:8000/viewer` allowing direct drag-and-drop upload, automatic boundary rendering, and live inspection of calculated areas and lengths.*
+
+---
+
 ## 📋 Requirements Compliance Matrix
 
 | Section | Assignment Requirement | Implementation Detail | Status |
