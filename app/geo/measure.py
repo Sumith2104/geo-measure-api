@@ -36,11 +36,13 @@ POINT = {"Point", "MultiPoint"}
 
 
 def _project(geom: BaseGeometry, src: CRS, dst_epsg: int) -> BaseGeometry:
+    """Reproject *geom* from *src* CRS to the given EPSG using a cached Transformer."""
     t = get_transformer(src.to_wkt(), dst_epsg)
     return shapely.transform(geom, lambda c: np.column_stack(t.transform(c[:, 0], c[:, 1])))
 
 
 def _ring_area_perimeter(geod, ring) -> tuple[float, float]:
+    """Return the absolute geodesic area and perimeter of a single ring."""
     xs, ys = zip(*[(c[0], c[1]) for c in ring.coords])
     a, per = geod.polygon_area_perimeter(xs, ys)
     return abs(a), per

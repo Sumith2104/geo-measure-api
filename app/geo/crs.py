@@ -16,6 +16,11 @@ LonLat = tuple[float, float]
 
 
 def is_metric_projected(crs: CRS) -> bool:
+    """Return True if *crs* is a projected CRS whose axes are in metres.
+
+    Checks that every axis has a unit_conversion_factor of exactly 1.0,
+    which rules out foot-based projections (e.g. US survey feet).
+    """
     return bool(
         crs.is_projected and crs.axis_info and all(abs(a.unit_conversion_factor - 1.0) < 1e-9 for a in crs.axis_info)
     )

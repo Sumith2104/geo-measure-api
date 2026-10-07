@@ -36,6 +36,11 @@ class ParsedFile:
 
 
 def _jsonable(v: Any) -> Any:
+    """Coerce any attribute value to a JSON-safe Python primitive.
+
+    Converts numpy scalars, NaN/NaT, and datetime-like objects; passes
+    plain str/int/float/bool through unchanged.
+    """
     if v is None or v is pd.NaT:
         return None
     if isinstance(v, float) and math.isnan(v):
@@ -48,6 +53,12 @@ def _jsonable(v: Any) -> Any:
 
 
 def _rows(gdf: gpd.GeoDataFrame, start: int, layer: str | None) -> list[RawFeature]:
+    """Convert a GeoDataFrame into a list of :class:`RawFeature` objects.
+
+    *start* is the global feature index offset so features from multiple
+    layers in the same file have unique, monotonically increasing indices.
+    Properties with ``None`` values are dropped to keep payloads compact.
+    """
     out = []
     cols = [c for c in gdf.columns if c != gdf.geometry.name]
     for i, (_, row) in enumerate(gdf.iterrows()):
