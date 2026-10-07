@@ -62,3 +62,37 @@ def test_too_large(client, monkeypatch, kml_bytes):
 
     monkeypatch.setattr(api.settings, "max_upload_bytes", 10)
     assert up(client, "s.kml", kml_bytes).status_code == 413
+
+
+def test_list_files(client, kml_bytes, shp_zip):
+    up(client, "a.kml", kml_bytes)
+    up(client, "b.zip", shp_zip)
+    listing = client.get("/api/files/").json()
+    assert len(listing) == 2
+    # Most recent first
+    assert listing[0]["filename"] == "b.zip"
+    # Pagination: limit=1
+    page = client.get("/api/files/?limit=1&offset=1").json()
+    assert len(page) == 1 and page[0]["filename"] == "a.kml"
+
+
+def test_include_geometry_measurements(client, kml_bytes):
+    fid = up(client, "s.kml", kml_bytes).json()["id"]
+    # Default: include_geometry=false -> geometry is null
+    m_no_geom = client.get(f"/api/files/{fid}/measurements/").json()
+    assert all(item["geometry"] is None for item in m_no_geom["items"])
+    # Explicit: include_geometry=true -> geometry is present for measurable features
+    m_with_geom = client.get(f"/api/files/{fid}/measurements/?include_geometry=true").json()
+    geom_items = [item for item in m_with_geom["items"] if item["geometry"] is not None]
+    assert len(geom_items) >= 1
+    assert geom_items[0]["geometry"]["type"] in ("Polygon", "LineString", "Point")
+
+
+def test_include_geometry_features(client, kml_bytes):
+    fid = up(client, "s.kml", kml_bytes).json()["id"]
+    # Default: include_geometry=true -> geometry is present
+    f_with = client.get(f"/api/files/{fid}/features/").json()
+    assert all(item["geometry"] is not None for item in f_with["items"])
+    # Explicit: include_geometry=false -> geometry is null
+    f_without = client.get(f"/api/files/{fid}/features/?include_geometry=false").json()
+    assert all(item["geometry"] is None for item in f_without["items"])

@@ -2,7 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.142.2-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/tests-23%20passed-brightgreen.svg?logo=pytest&logoColor=white)](https://docs.pytest.org/)
+[![Tests](https://img.shields.io/badge/tests-26%20passed-brightgreen.svg?logo=pytest&logoColor=white)](https://docs.pytest.org/)
 [![Code Style](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -80,7 +80,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Once started:
 - **Interactive Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
 - **Interactive ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
-- **Root URL Redirect:** Visiting [http://localhost:8000/](http://localhost:8000/) automatically opens `/docs`.
+- **Root URL Redirect:** Visiting [http://localhost:8000/](http://localhost:8000/) automatically opens the interactive `/viewer` map explorer.
 
 ### 2. Docker Setup
 
@@ -103,7 +103,7 @@ This repository features two distinct testing layers: **Automated Testing** and 
 
 ### 1. Automated Testing Methods
 
-#### A. Comprehensive Pytest Suite (23 Tests)
+#### A. Comprehensive Pytest Suite (26 Tests)
 Runs unit, integration, security, and mathematical accuracy tests in under 2 seconds:
 ```bash
 pytest -v
